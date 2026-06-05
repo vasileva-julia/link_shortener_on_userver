@@ -1,0 +1,55 @@
+version: "2.3"
+
+services:
+  postgres-db-1:
+    container_name: servicepostgres
+    image: postgres:14
+    environment: &db_env
+      POSTGRES_DB: mydb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5433"
+    volumes:
+      - ./postgresql/schemas:/docker-entrypoint-initdb.d
+    networks:
+      - ip6net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mydb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  link-shortener-container:
+    container_name: links-container
+    image: ghcr.io/userver-framework/ubuntu-22.04-userver-pg:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    #   target: final
+    privileged: true
+    environment:
+      <<: *db_env
+      PREFIX: ${PREFIX:-~/.local}
+      CCACHE_DIR: /home/user/app/app_src/.ccache
+      CORES_DIR: /cores
+    ports:
+      - "8083:8083"
+    volumes:
+      - ~/Reps/linkShortener:/home/user/app/app_src
+    working_dir: /home/user/app/app_src
+    entrypoint: ./run.sh
+    depends_on:
+      postgres-db-1:
+        condition: service_healthy
+    networks:
+      - ip6net
+      - extnet
+
+networks:
+  ip6net:
+    driver: bridge
+    internal: true
+  extnet:

@@ -4,7 +4,7 @@ components_manager:
 
     server:
       listener:
-        port: 8082
+        port: 8083
         task_processor: main-task-processor
 
     logging:
@@ -30,26 +30,43 @@ components_manager:
       update-interval: 5s
 
     postgres-db-1:
-      dbconnection: "postgresql://test_user:password@localhost:5432/mydb"
+      # dbconnection: "postgresql://testsuite@localhost:15433/mydb_db_1"
+      dbconnection: "postgresql://user:password@servicepostgres:5432/mydb"
       blocking_task_processor: fs-task-processor
+      dns_resolver: async
+      sync-start: false
+      connlimit_mode: manual
+      connecting_limit: 100
 
-    testsuite-support:
+    testsuite-support: {}
+
+    tests-control:
+      load-enabled: true # false
+      path: /tests/{action}
+      method: GET,POST
+      task_processor: main-task-processor
+      testpoint-timeout: 10s
+      testpoint-url: mockserver/testpoint
+      throttling_enabled: false
+
+    http-client:
+      core-component: http-client-core
+
+    http-client-middleware-pipeline: {} # for tests
+    
+    http-client-core:
+      fs-task-processor: fs-task-processor
+      testsuite-enabled: true
 
     dns-client:
-            fs-task-processor: fs-task-processor
+      fs-task-processor: fs-task-processor
 
     dynamic-config:
       defaults:
-        POSTGRES_CONNECTION_POOL_SETTINGS:
-          postgres-db-1:
-            max_pool_size: 15
-            max_queue_size: 200
-            min_pool_size: 8
-        POSTGRES_HANDLERS_COMMAND_CONTROL:
-          /v1/link:
-            GET:
-              network_timeout_ms: 500
-              statement_timeout_ms: 250
+        HTTP_CLIENT_CONNECTION_POOL_SIZE: 1000
+        POSTGRES_DEFAULT_COMMAND_CONTROL:
+          network_timeout_ms: 750
+          statement_timeout_ms: 500
         POSTGRES_QUERIES_COMMAND_CONTROL:
           sample_select_value:
             network_timeout_ms: 70
@@ -57,9 +74,6 @@ components_manager:
           sample_transaction_insert_key_value:
             network_timeout_ms: 200
             statement_timeout_ms: 150
-        POSTGRES_STATEMENT_METRICS_SETTINGS:
-          postgres-db-1:
-              max_statement_metrics: 5
 
   task_processors:
 

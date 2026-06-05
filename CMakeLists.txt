@@ -23,3 +23,8 @@ target_link_libraries(${PROJECT_NAME}_objs userver::postgresql)
 target_include_directories(${PROJECT_NAME}_objs PUBLIC src)
 
 target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_objs)
+
+
+ 
+userver_testsuite_add_simple()
+ 
