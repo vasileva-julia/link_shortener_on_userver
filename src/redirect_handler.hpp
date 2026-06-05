@@ -1,5 +1,5 @@
-#ifndef HANDLER_H
-#define HANDLER_H
+#ifndef REDIRECTHANDLER_H
+#define REDIRECTHANDLER_H
 
 #include <userver/server/handlers/http_handler_base.hpp>
 #include <userver/storages/postgres/cluster.hpp>
@@ -8,7 +8,8 @@
 
 #include "links_cache.hpp"
 
-class RedirectHandler final : public userver::server::handlers::HttpHandlerBase {
+class RedirectHandler final : public userver::server::handlers::HttpHandlerBase
+{
 public:
     static constexpr std::string_view kName = "handler-redirect-to-long";
 
@@ -23,4 +24,4 @@ private:
     userver::storages::postgres::ClusterPtr pg_cluster_;
 };
 
-#endif // HANDLER_H
+#endif // REDIRECTHANDLER_H

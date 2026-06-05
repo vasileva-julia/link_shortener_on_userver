@@ -15,12 +15,15 @@
 
 #include "index.hpp"
 
-namespace shortener {
-    namespace components {
-
-        class LinksCache : public userver::components::CachingComponentBase<shortener::models::Index> {
+namespace shortener
+{
+    namespace components
+    {
+        class LinksCache : public userver::components::CachingComponentBase<shortener::models::Index>
+        {
         public:
             constexpr static const std::string_view kName = "recent-links-cache";
+            
             LinksCache(const userver::components::ComponentConfig& config,
                        const userver::components::ComponentContext& context);
         private:

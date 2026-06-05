@@ -5,10 +5,12 @@
 #include<string>
 #include<memory>
 
-namespace shortener {
-    namespace models {
-        
-        struct Index final {
+namespace shortener
+{
+    namespace models
+    {
+        struct Index final
+        {
             using IndexById = std::unordered_map<std::string /* id */, std::string /* link */>;
 
             explicit Index(IndexById links = {});

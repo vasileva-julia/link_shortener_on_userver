@@ -9,12 +9,14 @@
 
 #include <string_view>
 
-class LinkMakerHandler final : public userver::server::handlers::HttpHandlerBase {
+class LinkMakerHandler final : public userver::server::handlers::HttpHandlerBase
+{
 public:
     static constexpr std::string_view kName = "handler-link-maker";
 
     LinkMakerHandler(const userver::components::ComponentConfig& config,
                      const userver::components::ComponentContext& context);
+                     
     std::string HandleRequest(userver::server::http::HttpRequest& request,
                               userver::server::request::RequestContext&) const override;
 
