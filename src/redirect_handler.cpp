@@ -8,26 +8,40 @@ RedirectHandler::RedirectHandler(
       pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db-1").GetCluster())
 {}
 
-std::string RedirectHandler::HandleRequest(userver::server::http::HttpRequest& request, userver::server::request::RequestContext&) const
+std::string RedirectHandler::HandleRequest(userver::server::http::HttpRequest& request,
+                                           userver::server::request::RequestContext&) const
 {
+    if (request.GetMethod() != userver::server::http::HttpMethod::kGet)
+    {
+        throw userver::server::handlers::ClientError(userver::server::handlers::ExternalBody
+            {fmt::format("Unsupported method {}", request.GetMethod())});
+    }
+
     const auto& id = request.GetPathArg("id");
     const auto links_index = links_cache_.Get();
     const auto& all_links = links_index->all_links;
 
-    if (all_links.find(id) != all_links.end())
+    auto link_it = all_links.find(id);
+    std::string link;
+    if (link_it == all_links.end())
     {
-        request.SetResponseStatus(userver::server::http::HttpStatus::kMovedPermanently);
-        std::string link = all_links.at(id);
-        link = "http://" + link;
-        std::string header = "Location";
-        request.GetHttpResponse().SetHeader(header, link);
-        return {};
+        auto result = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
+                                           "SELECT url FROM mydb.urls WHERE id = $1",
+                                           id);
+        if (result.IsEmpty())
+        {
+            request.SetResponseStatus(userver::server::http::HttpStatus::kNotFound);
+            request.GetHttpResponse().SetContentType(userver::http::content_type::kTextPlain);
+            return {};
+        }
+        else
+            link = result.AsSingleRow<std::string>();
     }
     else
-    {
-        // TODO: search in db
-        request.SetResponseStatus(userver::server::http::HttpStatus::kNotFound);
-        request.GetHttpResponse().SetContentType({"text/html"});
-        return "not found";
-    }
+        link = link_it->second;
+
+    std::string_view header = "Location";
+    request.SetResponseStatus(userver::server::http::HttpStatus::kMovedPermanently);
+    request.GetHttpResponse().SetHeader(header, link);
+    return {};
 }

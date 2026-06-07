@@ -22,7 +22,7 @@ void LinksCache::Update(
     userver::cache::UpdateType /* type */,
     [[maybe_unused]] const std::chrono::system_clock::time_point& last_update,
     [[maybe_unused]] const std::chrono::system_clock::time_point& now,
-    userver::cache::UpdateStatisticsScope& /* stats_scope */)
+    userver::cache::UpdateStatisticsScope& stats_scope)
 {
     auto result = pg_cluster_->Execute(
         userver::storages::postgres::ClusterHostType::kSlave,
@@ -30,7 +30,12 @@ void LinksCache::Update(
     auto converted_result = result.AsContainer<std::vector<IdAndUrl>>
                                     (userver::storages::postgres::kRowTag);
     shortener::models::Index new_index;
+    const auto size = converted_result.size();
+    stats_scope.IncreaseDocumentsReadCount(size);
+
     for (const auto& item : converted_result)
         new_index.all_links[item.id] = item.url;
+
     Emplace(new_index);
+    stats_scope.Finish(size);
 }
