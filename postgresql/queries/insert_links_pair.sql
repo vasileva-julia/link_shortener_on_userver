@@ -1,0 +1,3 @@
+INSERT INTO mydb.urls (id, url)
+VALUES ($1, $2)
+ON CONFLICT DO NOTHING;
