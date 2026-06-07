@@ -1,4 +1,5 @@
 #include "redirect_handler.hpp"
+#include "shortener/sql_queries.hpp"
 
 RedirectHandler::RedirectHandler(
     const userver::components::ComponentConfig& config,
@@ -26,7 +27,7 @@ std::string RedirectHandler::HandleRequest(userver::server::http::HttpRequest& r
     if (link_it == all_links.end())
     {
         auto result = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
-                                           "SELECT url FROM mydb.urls WHERE id = $1",
+                                           shortener::sql::kSelectLonglinkByShortlink,
                                            id);
         if (result.IsEmpty())
         {

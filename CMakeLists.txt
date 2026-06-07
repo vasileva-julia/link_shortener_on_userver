@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(link_shortener)
+project(link_shortener CXX)
 
 find_package(
     userver
@@ -22,9 +22,20 @@ add_library(${PROJECT_NAME}_objs OBJECT
 target_link_libraries(${PROJECT_NAME}_objs userver::postgresql)
 target_include_directories(${PROJECT_NAME}_objs PUBLIC src)
 
+userver_add_sql_library(
+    ${PROJECT_NAME}_sql
+    NAMESPACE
+    shortener
+    SOURCE_DIR
+    postgresql/queries
+    OUTPUT_DIR
+    ${CMAKE_CURRENT_BINARY_DIR}
+    SQL_FILES
+    *.sql
+)
+target_link_libraries(${PROJECT_NAME}_objs ${PROJECT_NAME}_sql)
+
 target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_objs)
 
-
- 
-userver_testsuite_add_simple()
+userver_testsuite_add_simple(SQL_LIBRARY ${PROJECT_NAME}_sql)
  

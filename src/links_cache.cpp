@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "shortener/sql_queries.hpp"
+
 using namespace shortener::components;
 
 LinksCache::LinksCache(
@@ -24,11 +26,9 @@ void LinksCache::Update(
     [[maybe_unused]] const std::chrono::system_clock::time_point& now,
     userver::cache::UpdateStatisticsScope& stats_scope)
 {
-    auto result = pg_cluster_->Execute(
-        userver::storages::postgres::ClusterHostType::kSlave,
-        "SELECT id, url FROM mydb.urls");
-    auto converted_result = result.AsContainer<std::vector<IdAndUrl>>
-                                    (userver::storages::postgres::kRowTag);
+    auto result = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
+                                       sql::kSelectAllLinksPairs);
+    auto converted_result = result.AsContainer<std::vector<IdAndUrl>>(userver::storages::postgres::kRowTag);
     shortener::models::Index new_index;
     const auto size = converted_result.size();
     stats_scope.IncreaseDocumentsReadCount(size);

@@ -1,5 +1,7 @@
 #include "link_maker_handler.hpp"
 
+#include "shortener/sql_queries.hpp"
+
 LinkMakerHandler::LinkMakerHandler(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& context)
@@ -36,7 +38,7 @@ std::string LinkMakerHandler::HandleRequest(
                                userver::storages::postgres::ClusterHostType::kMaster,
                                {});
 
-    auto result = transaction.Execute("INSERT INTO mydb.urls (id, url) VALUES ($1, $2);", shortlink, longlink);
+    auto result = transaction.Execute(shortener::sql::kInsertLinksPair, shortlink, longlink);
     if (result.RowsAffected())
     {
         transaction.Commit();
@@ -44,9 +46,8 @@ std::string LinkMakerHandler::HandleRequest(
     }
     else
     {
-        result = transaction.Execute("SELECT url FROM mydb.urls WHERE id = $1;", shortlink);
+        result = transaction.Execute(shortener::sql::kSelectLonglinkByShortlink, shortlink);
         transaction.Rollback();
-        request.SetResponseStatus(userver::server::http::HttpStatus::kImATeapot);
     
         if (!result.IsEmpty())
             request.SetResponseStatus(userver::server::http::HttpStatus::kConflict);
