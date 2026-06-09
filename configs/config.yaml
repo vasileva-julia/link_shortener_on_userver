@@ -1,28 +1,31 @@
+config_vars: /home/user/app/app_src/configs/config_vars.yaml
+
+
 components_manager:
 
   components:
 
     server:
       listener:
-        port: 8083
+        port: $server-port
         task_processor: main-task-processor
 
     logging:
       loggers:
         default:
           file_path: '@stderr'
-          level: debug
+          level: $logger-level
           overflow_behavior: discard
 
     handler-link-maker:
         path: /v1/create
         task_processor: main-task-processor
-        method: GET,POST
+        method: POST
 
     handler-redirect-to-long:
       path: /v1/link/{id}
       task_processor: main-task-processor
-      method: GET,POST
+      method: GET
 
     recent-links-cache:
       update-types: full-and-incremental
@@ -30,18 +33,17 @@ components_manager:
       update-interval: 5s
 
     postgres-db-1:
-      # dbconnection: "postgresql://testsuite@localhost:15433/mydb_db_1"
-      dbconnection: "postgresql://user:password@servicepostgres:5432/mydb"
+      dbconnection: $dbconnection
       blocking_task_processor: fs-task-processor
       dns_resolver: async
       sync-start: false
       connlimit_mode: manual
       connecting_limit: 100
 
-    testsuite-support: {}
+    testsuite-support:
 
     tests-control:
-      load-enabled: true # false
+      load-enabled: $testsuite-enabled
       path: /tests/{action}
       method: GET,POST
       task_processor: main-task-processor
@@ -52,11 +54,11 @@ components_manager:
     http-client:
       core-component: http-client-core
 
-    http-client-middleware-pipeline: {} # for tests
+    http-client-middleware-pipeline:
     
     http-client-core:
       fs-task-processor: fs-task-processor
-      testsuite-enabled: true
+      testsuite-enabled: $testsuite-enabled
 
     dns-client:
       fs-task-processor: fs-task-processor
@@ -78,9 +80,9 @@ components_manager:
   task_processors:
 
     main-task-processor:
-      worker_threads: 4
+      worker_threads: $worker-threads
 
     fs-task-processor:
-      worker_threads: 4
+      worker_threads: $worker-fs-threads
 
   default_task_processor: main-task-processor

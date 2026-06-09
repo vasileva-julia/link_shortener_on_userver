@@ -1,8 +1,20 @@
 #!/bin/bash
 
-groupadd --gid 2000 user && useradd --uid 2000 --gid user --shell /bin/bash --create-home user
-usermod -u $1 user groupmod -g $1 user
+BDIR="build_release"
+DIR="$PWD/$BDIR"
 
-usermod -u 1000 user && groupmod -g 1000 user
+groupadd --gid 2000 node && useradd --uid 2000 --gid node --shell /bin/bash --create-home node
+usermod -u $1 node groupmod -g $1 node
 
-sleep infinity
+usermod -u 1000 node && groupmod -g 1000 node
+
+if [[ -d "$DIR" ]]
+then
+    echo "The directory $DIR exists."
+else
+    su node --command "mkdir $BDIR"
+fi
+cd $BDIR
+
+su node --command "cmake -DCMAKE_BUILD_TYPE=Release .."
+su node --command "make start-link_shortener"

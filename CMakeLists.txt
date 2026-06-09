@@ -37,5 +37,5 @@ target_link_libraries(${PROJECT_NAME}_objs ${PROJECT_NAME}_sql)
 
 target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_objs)
 
-userver_testsuite_add_simple(SQL_LIBRARY ${PROJECT_NAME}_sql)
- 
+
+userver_testsuite_add_simple(SQL_LIBRARY ${PROJECT_NAME}_sql) 

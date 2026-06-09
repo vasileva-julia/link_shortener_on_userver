@@ -1,0 +1,9 @@
+worker-threads: 4
+worker-fs-threads: 2
+logger-level: info
+
+testsuite-enabled: false
+
+server-port: 8083
+
+dbconnection: "postgresql://user:password@servicepostgres:5432/mydb"

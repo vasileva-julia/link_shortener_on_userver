@@ -27,19 +27,20 @@ services:
     image: ghcr.io/userver-framework/ubuntu-22.04-userver-pg:latest
     # build:
     #   context: .
-    #   dockerfile: Dockerfile
+    #   dockerfile: ./Dockerfile
     #   target: final
-    privileged: true
+    # privileged: true
     environment:
       <<: *db_env
       PREFIX: ${PREFIX:-~/.local}
-      CCACHE_DIR: /home/user/app/app_src/.ccache
+      CCACHE_DIR: /home/node/app/app_src/.ccache
       CORES_DIR: /cores
+    # user: node
     ports:
       - "8083:8083"
     volumes:
-      - ~/Reps/linkShortener:/home/user/app/app_src
-    working_dir: /home/user/app/app_src
+      - ~/Reps/linkShortener:/home/node/app/app_src
+    working_dir: /home/node/app/app_src
     entrypoint: ./run.sh
     depends_on:
       postgres-db-1:

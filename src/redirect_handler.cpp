@@ -24,7 +24,11 @@ std::string RedirectHandler::HandleRequest(userver::server::http::HttpRequest& r
 
     auto link_it = all_links.find(id);
     std::string link;
-    if (link_it == all_links.end())
+    if (link_it != all_links.end())
+    {
+        link = link_it->second;
+    }
+    else
     {
         auto result = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                            shortener::sql::kSelectLonglinkByShortlink,
@@ -38,11 +42,9 @@ std::string RedirectHandler::HandleRequest(userver::server::http::HttpRequest& r
         else
             link = result.AsSingleRow<std::string>();
     }
-    else
-        link = link_it->second;
 
     std::string_view header = "Location";
-    request.SetResponseStatus(userver::server::http::HttpStatus::kMovedPermanently);
+    request.SetResponseStatus(userver::server::http::HttpStatus::kFound);
     request.GetHttpResponse().SetHeader(header, link);
     return {};
 }
