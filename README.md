@@ -2,7 +2,10 @@
 
 Сервис для сокращения ссылок, написанный с использованием userver.
 
-## Запуск:
+## Стек
+с++, userver, postgres, SQL, python, pytest, HTTP, Docker, docker-compose, cmake
+
+## Запуск
 Запустить:
 ```bash
 docker compose -f ./docker-compose.yaml up
